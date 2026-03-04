@@ -4,11 +4,510 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>孙皓然 - 个人主页</title>
-    <link rel="stylesheet" href="style.css">
-    <!-- 可选：引入图标库（比如Font Awesome） -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css">
+    <style>
+        /* 全局样式重置 + 基础变量 */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', 'Roboto', 'Arial', sans-serif;
+            --primary-color: #00f0ff;
+            --secondary-color: #ff00f0;
+            --dark-bg: #0a0a18;
+            --glass-bg: rgba(10, 10, 24, 0.7);
+            --glass-border: rgba(0, 240, 255, 0.3);
+            --gradient: linear-gradient(135deg, #00f0ff, #ff00f0, #ffd000);
+        }
+
+        /* 背景粒子动效容器 */
+        .particle-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: var(--dark-bg);
+            z-index: -1;
+            overflow: hidden;
+        }
+
+        /* 自定义滚动条 */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: var(--dark-bg);
+        }
+        ::-webkit-scrollbar-thumb {
+            background: var(--primary-color);
+            border-radius: 4px;
+            box-shadow: 0 0 10px var(--primary-color);
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--secondary-color);
+            box-shadow: 0 0 15px var(--secondary-color);
+        }
+
+        /* 容器样式 */
+        .container {
+            width: 90%;
+            max-width: 1200px;
+            margin: 0 auto;
+            position: relative;
+            z-index: 2;
+        }
+
+        /* 顶部导航栏（毛玻璃+光效） */
+        .navbar {
+            background: var(--glass-bg);
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+            border-bottom: 1px solid var(--glass-border);
+            padding: 1.2rem 0;
+            position: fixed;
+            top: 0;
+            width: 100%;
+            z-index: 999;
+            box-shadow: 0 0 20px rgba(0, 240, 255, 0.2);
+            transition: all 0.5s ease;
+        }
+        .navbar:hover {
+            box-shadow: 0 0 30px rgba(0, 240, 255, 0.4);
+        }
+        .navbar .container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .logo {
+            font-size: 1.8rem;
+            color: white;
+            text-decoration: none;
+            font-weight: 700;
+            background: var(--gradient);
+            background-size: 200% auto;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: gradient-flow 3s linear infinite;
+            letter-spacing: 2px;
+        }
+        .nav-menu {
+            list-style: none;
+            display: flex;
+            gap: 2.5rem;
+        }
+        .nav-menu a {
+            color: white;
+            text-decoration: none;
+            font-size: 1.1rem;
+            position: relative;
+            padding: 0.5rem 0;
+            transition: all 0.3s ease;
+        }
+        .nav-menu a::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: var(--gradient);
+            background-size: 200% auto;
+            transition: width 0.5s ease;
+        }
+        .nav-menu a:hover {
+            color: var(--primary-color);
+            text-shadow: 0 0 10px var(--primary-color);
+        }
+        .nav-menu a:hover::after {
+            width: 100%;
+            animation: gradient-flow 3s linear infinite;
+        }
+
+        /* 英雄区（核心视觉+毛玻璃+光效） */
+        .hero {
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding-top: 80px;
+            position: relative;
+        }
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 600px;
+            height: 600px;
+            background: radial-gradient(circle, rgba(0, 240, 255, 0.2), transparent 70%);
+            border-radius: 50%;
+            z-index: 1;
+            animation: pulse 4s ease-in-out infinite;
+        }
+        .avatar {
+            width: 180px;
+            height: 180px;
+            border-radius: 50%;
+            border: 4px solid transparent;
+            background: var(--gradient);
+            background-size: 200% auto;
+            padding: 4px;
+            margin-bottom: 1.5rem;
+            box-shadow: 0 0 30px rgba(0, 240, 255, 0.5), inset 0 0 20px rgba(255, 0, 240, 0.3);
+            animation: gradient-flow 3s linear infinite, rotate-avatar 15s linear infinite reverse;
+            position: relative;
+            z-index: 2;
+        }
+        .avatar img {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            object-fit: cover;
+            background: var(--dark-bg);
+        }
+        .hero h1 {
+            font-size: 4rem;
+            margin-bottom: 1rem;
+            color: white;
+            text-shadow: 0 0 20px rgba(0, 240, 255, 0.6);
+            position: relative;
+            z-index: 2;
+            animation: fade-in-up 1s ease-out;
+        }
+        .hero h1 span {
+            background: var(--gradient);
+            background-size: 200% auto;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: gradient-flow 3s linear infinite;
+        }
+        .hero p {
+            font-size: 1.4rem;
+            color: #ccc;
+            margin-bottom: 2.5rem;
+            text-shadow: 0 0 10px rgba(255, 255, 255, 0.3);
+            position: relative;
+            z-index: 2;
+            animation: fade-in-up 1s ease-out 0.3s both;
+        }
+        .social-links {
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+            font-size: 2.5rem;
+            position: relative;
+            z-index: 2;
+            animation: fade-in-up 1s ease-out 0.6s both;
+        }
+        .social-links a {
+            color: white;
+            width: 70px;
+            height: 70px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--glass-bg);
+            backdrop-filter: blur(10px);
+            border: 1px solid var(--glass-border);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        .social-links a::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: left 0.5s ease;
+        }
+        .social-links a:hover {
+            transform: translateY(-8px) scale(1.1);
+            box-shadow: 0 0 25px var(--primary-color);
+            border-color: var(--primary-color);
+            color: var(--primary-color);
+        }
+        .social-links a:hover::before {
+            left: 100%;
+        }
+
+        /* 通用分区样式（毛玻璃+光效边框） */
+        .section {
+            padding: 8rem 0;
+            position: relative;
+        }
+        .section::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 80%;
+            height: 1px;
+            background: var(--gradient);
+            background-size: 200% auto;
+            box-shadow: 0 0 15px var(--primary-color);
+            animation: gradient-flow 3s linear infinite;
+        }
+        .section h2 {
+            font-size: 3rem;
+            text-align: center;
+            margin-bottom: 4rem;
+            color: white;
+            position: relative;
+            background: var(--gradient);
+            background-size: 200% auto;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: gradient-flow 3s linear infinite;
+        }
+
+        /* About 区域（毛玻璃卡片） */
+        #about {
+            background: var(--glass-bg);
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+            border: 1px solid var(--glass-border);
+            border-radius: 20px;
+            margin: 0 auto;
+            max-width: 1000px;
+            box-shadow: 0 0 30px rgba(0, 240, 255, 0.2);
+            animation: fade-in 1s ease-out;
+        }
+        #about:hover {
+            box-shadow: 0 0 40px rgba(0, 240, 255, 0.4);
+            border-color: rgba(0, 240, 255, 0.5);
+            transition: all 0.5s ease;
+        }
+        #about p {
+            font-size: 1.2rem;
+            line-height: 2;
+            color: #e0e0e0;
+            max-width: 800px;
+            margin: 0 auto 3rem;
+            text-align: center;
+            padding: 0 1rem;
+        }
+        .skills {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 1.5rem;
+            margin-top: 2rem;
+        }
+        .skills span {
+            background: var(--glass-bg);
+            backdrop-filter: blur(10px);
+            border: 1px solid var(--glass-border);
+            padding: 0.8rem 2rem;
+            border-radius: 50px;
+            color: white;
+            font-size: 1.1rem;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        .skills span::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: var(--gradient);
+            background-size: 200% auto;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            z-index: -1;
+        }
+        .skills span:hover {
+            transform: translateY(-5px) scale(1.05);
+            box-shadow: 0 0 20px var(--primary-color);
+            border-color: var(--primary-color);
+            color: white;
+        }
+        .skills span:hover::before {
+            opacity: 1;
+            animation: gradient-flow 3s linear infinite;
+        }
+
+        /* Projects 区域（悬浮卡片+光效） */
+        .project-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 3rem;
+            animation: fade-in 1s ease-out 0.3s both;
+        }
+        .project-item {
+            background: var(--glass-bg);
+            backdrop-filter: blur(15px);
+            border: 1px solid var(--glass-border);
+            border-radius: 15px;
+            padding: 2.5rem;
+            text-align: center;
+            transition: all 0.5s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        .project-item::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: var(--gradient);
+            background-size: 200% auto;
+            animation: gradient-flow 3s linear infinite;
+        }
+        .project-item:hover {
+            transform: translateY(-15px) scale(1.03);
+            box-shadow: 0 20px 40px rgba(0, 240, 255, 0.3);
+            border-color: var(--primary-color);
+        }
+        .project-item h3 {
+            font-size: 1.8rem;
+            margin-bottom: 1.5rem;
+            color: white;
+            text-shadow: 0 0 10px rgba(255, 255, 255, 0.3);
+        }
+        .project-item p {
+            color: #ccc;
+            margin-bottom: 2rem;
+            line-height: 1.8;
+        }
+        .project-item a {
+            display: inline-block;
+            background: var(--gradient);
+            background-size: 200% auto;
+            color: white;
+            padding: 1rem 2.5rem;
+            border-radius: 50px;
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            box-shadow: 0 0 15px rgba(0, 240, 255, 0.2);
+            animation: gradient-flow 3s linear infinite;
+        }
+        .project-item a:hover {
+            transform: scale(1.1);
+            box-shadow: 0 0 25px rgba(0, 240, 255, 0.5);
+        }
+
+        /* Contact 区域（毛玻璃+流光） */
+        #contact {
+            background: var(--glass-bg);
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+            border: 1px solid var(--glass-border);
+            border-radius: 20px;
+            margin: 0 auto;
+            max-width: 800px;
+            box-shadow: 0 0 30px rgba(0, 240, 255, 0.2);
+            animation: fade-in 1s ease-out 0.6s both;
+        }
+        #contact:hover {
+            box-shadow: 0 0 40px rgba(0, 240, 255, 0.4);
+            border-color: rgba(0, 240, 255, 0.5);
+            transition: all 0.5s ease;
+        }
+        #contact p {
+            font-size: 1.3rem;
+            text-align: center;
+            color: #e0e0e0;
+            margin-bottom: 2rem;
+            transition: all 0.3s ease;
+        }
+        #contact p:hover {
+            color: var(--primary-color);
+            text-shadow: 0 0 15px var(--primary-color);
+            transform: scale(1.05);
+        }
+
+        /* 页脚（毛玻璃+光效） */
+        footer {
+            background: var(--glass-bg);
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+            border-top: 1px solid var(--glass-border);
+            padding: 3rem 0;
+            text-align: center;
+            color: #ccc;
+            margin-top: 5rem;
+            box-shadow: 0 -5px 20px rgba(0, 240, 255, 0.1);
+        }
+        footer p {
+            font-size: 1.1rem;
+            position: relative;
+        }
+        footer p::after {
+            content: '';
+            position: absolute;
+            bottom: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 80px;
+            height: 2px;
+            background: var(--gradient);
+            background-size: 200% auto;
+            animation: gradient-flow 3s linear infinite;
+        }
+
+        /* 动画定义 */
+        /* 渐变流光 */
+        @keyframes gradient-flow {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+        /* 呼吸脉冲 */
+        @keyframes pulse {
+            0%, 100% { transform: translate(-50%, -50%) scale(1); opacity: 0.7; }
+            50% { transform: translate(-50%, -50%) scale(1.2); opacity: 0.4; }
+        }
+        /* 头像缓慢旋转 */
+        @keyframes rotate-avatar {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        /* 淡入上移 */
+        @keyframes fade-in-up {
+            0% { opacity: 0; transform: translateY(30px); }
+            100% { opacity: 1; transform: translateY(0); }
+        }
+        /* 淡入 */
+        @keyframes fade-in {
+            0% { opacity: 0; transform: translateY(20px); }
+            100% { opacity: 1; transform: translateY(0); }
+        }
+
+        /* 响应式适配 */
+        @media (max-width: 768px) {
+            .hero h1 { font-size: 2.5rem; }
+            .hero p { font-size: 1.2rem; }
+            .section h2 { font-size: 2.2rem; }
+            .nav-menu { gap: 1.5rem; }
+            .nav-menu a { font-size: 1rem; }
+            .avatar { width: 150px; height: 150px; }
+            .social-links { gap: 1.5rem; }
+            .social-links a { width: 60px; height: 60px; font-size: 2rem; }
+            .project-list { grid-template-columns: 1fr; }
+            .project-item { padding: 2rem; }
+        }
+    </style>
 </head>
 <body>
+    <!-- 背景粒子动效容器 -->
+    <div class="particle-bg" id="particle-bg"></div>
+
     <!-- 顶部导航栏 -->
     <nav class="navbar">
         <div class="container">
@@ -24,9 +523,9 @@
     <!-- 英雄区（首页头部） -->
     <header class="hero">
         <div class="container">
-            <img src="assets/avatar.jpg" alt="头像" class="avatar">
-            <h1>你好，我是 孙皓然</h1>
-            <p>一名程序员 / 学生 / 设计师（替换成你的简介）</p>
+            <img src="assets/avatar.jpg" alt="孙皓然的头像" class="avatar">
+            <h1>你好，我是 <span>孙皓然</span></h1>
+            <p>一名热爱编程的学生 | 专注Python/Java/前端开发</p>
             <div class="social-links">
                 <a href="https://github.com/SUN-sir-Ji" target="_blank"><i class="fa fa-github"></i></a>
                 <a href="https://gitee.com/suns-radiance" target="_blank"><i class="fa fa-code-fork"></i></a>
@@ -39,12 +538,16 @@
     <section id="about" class="section">
         <div class="container">
             <h2>About Me</h2>
-            <p>替换成你的个人介绍：比如你的专业、兴趣、技能（Python/Java/前端等）、学习目标等。</p>
+            <p>我是一名对编程充满热情的学生，擅长Python、Java和前端开发，喜欢探索新技术、搭建有趣的项目。<br>
+            平时热衷于学习开源技术，研究Git版本控制、自动化脚本和前端炫酷效果，目标是成为一名全栈开发工程师。<br>
+            除了编程，我也喜欢研究科技产品、打游戏，始终保持对技术和生活的热爱。</p>
             <div class="skills">
                 <span>Python</span>
                 <span>Git</span>
                 <span>HTML/CSS</span>
                 <span>Java</span>
+                <span>JavaScript</span>
+                <span>自动化</span>
             </div>
         </div>
     </section>
@@ -56,15 +559,15 @@
             <div class="project-list">
                 <!-- 项目1 -->
                 <div class="project-item">
-                    <h3>项目名称1</h3>
-                    <p>项目描述：比如“基于Python的爬虫工具”</p>
-                    <a href="https://github.com/你的用户名/项目名" target="_blank">查看源码</a>
+                    <h3>Python爬虫工具</h3>
+                    <p>基于requests和BeautifulSoup开发的通用爬虫框架，支持多线程、反爬处理，可快速爬取各类网站数据。</p>
+                    <a href="https://github.com/SUN-sir-Ji/Spider-Tool" target="_blank">查看源码</a>
                 </div>
                 <!-- 项目2 -->
                 <div class="project-item">
-                    <h3>项目名称2</h3>
-                    <p>项目描述：比如“个人博客网站”</p>
-                    <a href="https://github.com/你的用户名/项目名" target="_blank">查看源码</a>
+                    <h3>个人主页网站</h3>
+                    <p>基于HTML/CSS开发的炫酷个人主页，包含毛玻璃效果、渐变光效、多动画，适配移动端和PC端。</p>
+                    <a href="https://github.com/SUN-sir-Ji/SUN-sir-Ji.github.io" target="_blank">查看源码</a>
                 </div>
             </div>
         </div>
@@ -85,5 +588,83 @@
             <p>&copy; 2026 孙皓然 - All Rights Reserved</p>
         </div>
     </footer>
+
+    <!-- 粒子动效JS（科技感背景） -->
+    <script>
+        // 简单的粒子动效，增强科技感
+        const canvas = document.createElement('canvas');
+        const ctx = canvas.getContext('2d');
+        const particleBg = document.getElementById('particle-bg');
+        particleBg.appendChild(canvas);
+
+        // 设置canvas尺寸
+        function resizeCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+        window.addEventListener('resize', resizeCanvas);
+        resizeCanvas();
+
+        // 粒子类
+        class Particle {
+            constructor() {
+                this.x = Math.random() * canvas.width;
+                this.y = Math.random() * canvas.height;
+                this.size = Math.random() * 2 + 0.5;
+                this.speedX = Math.random() * 0.5 - 0.25;
+                this.speedY = Math.random() * 0.5 - 0.25;
+                this.color = Math.random() > 0.5 ? '#00f0ff' : '#ff00f0';
+            }
+            update() {
+                this.x += this.speedX;
+                this.y += this.speedY;
+                // 边界检测
+                if (this.x < 0 || this.x > canvas.width) this.speedX = -this.speedX;
+                if (this.y < 0 || this.y > canvas.height) this.speedY = -this.speedY;
+            }
+            draw() {
+                ctx.fillStyle = this.color;
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                ctx.fill();
+                // 绘制粒子间的连线
+                particles.forEach(particle => {
+                    const dx = this.x - particle.x;
+                    const dy = this.y - particle.y;
+                    const distance = Math.sqrt(dx * dx + dy * dy);
+                    if (distance < 100) {
+                        ctx.strokeStyle = `rgba(0, 240, 255, ${0.1 - distance/1000})`;
+                        ctx.lineWidth = 0.5;
+                        ctx.beginPath();
+                        ctx.moveTo(this.x, this.y);
+                        ctx.lineTo(particle.x, particle.y);
+                        ctx.stroke();
+                    }
+                });
+            }
+        }
+
+        // 创建粒子数组
+        let particles = [];
+        function initParticles() {
+            particles = [];
+            const particleCount = Math.min(150, canvas.width / 5);
+            for (let i = 0; i < particleCount; i++) {
+                particles.push(new Particle());
+            }
+        }
+        initParticles();
+
+        // 动画循环
+        function animate() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            particles.forEach(particle => {
+                particle.update();
+                particle.draw();
+            });
+            requestAnimationFrame(animate);
+        }
+        animate();
+    </script>
 </body>
 </html>
